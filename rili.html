@@ -1,0 +1,257 @@
+<!doctype html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,initial-scale=1.0,width=device-width" />
+    <meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+    <title>考勤打卡-就餐</title>
+    <link rel="stylesheet" type="text/css" href="../../css/api.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/aui.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/style.css" />
+    <!-- <link rel="stylesheet" type="text/css" href="../../css/weui.min.css" /> -->
+    <link rel="stylesheet" type="text/css" href="../../css/jquery-weui.min.css" />
+
+    <style media="screen">
+        html,
+        body {
+            background: #fff;
+            padding-bottom: 3rem
+        }
+
+        .week {
+            display: flex;
+            padding-bottom: 1rem;
+        }
+
+        .week span {
+            flex: 1;
+            text-align: center;
+        }
+
+        .day {
+            /*display: flex;*/
+            padding-bottom: .5rem;
+            overflow: hidden;
+
+        }
+        .day:first-of-type{
+            text-align: right
+        }
+
+        .day span {
+            /*float:;*/
+            position: relative;
+            display: inline-block;
+            width: 14.28%;
+            height: 2rem;
+            /*padding-bottom: 1rem;*/
+            text-align: center;
+            border-radius: 50%;
+            /*border: 1px solid #f00*/
+
+        }
+
+        .day span.active {
+            background-color: #157AFE;
+        }
+        .day i{
+          display: inline-block;
+          width: 5px;
+          height: 5px;
+          border-radius: 50%;
+          background-color: #f0f;
+          position: absolute;
+          bottom: 0px;
+          left: 50%;
+        }
+    </style>
+    <link rel="stylesheet" type="text/css" id="styleLink" href="../../css/blue/blue.css" />
+</head>
+
+<body>
+    <div id="app" class="eatSelect">
+        <header>
+            <i class="i-close" @click="closeWin"></i>
+            <span>考勤打卡</span>
+            <!-- <div class="header_r" @click="closeWin">确认</div> -->
+        </header>
+        <div class="mt4"></div>
+        <div class="mt2p5"></div>
+
+        <div class="">
+            {{showTime}}
+        </div>
+        <div class="rili">
+
+            <div class="rl-main">
+                <div class="week" id="weekBar">
+                </div>
+                <div class="showDay" id="dayBar">
+                </div>
+            </div>
+        </div>
+
+
+
+    </div>
+    <script type="text/javascript" src="../../script/fastclick.js"></script>
+    <script type="text/javascript" src="../../script/api.js"></script>
+    <script type="text/javascript" src="../../script/rem.js"></script>
+    <script type="text/javascript" src="../../script/md5.js"></script>
+    <script type="text/javascript" src="../../script/aui-dialog.js"></script>
+    <script type="text/javascript" src="../../script/aui-toast.js"></script>
+    <script type="text/javascript" src="../../script/jquery-2.1.4.js"></script>
+    <script type="text/javascript" src="../../script/script.js"></script>
+    <script type="text/javascript" src="../../script/vue.min.js"></script>
+    <script type="text/javascript" src="../../script/jquery-weui.min.js"></script>
+    <script type="text/javascript">
+        $(function() {
+
+        });
+    </script>
+    <script type="text/javascript">
+        $(function() {
+            FastClick.attach(document.body);
+        });
+
+        apiready = function() {
+            setStyle(1, 2)
+
+            var toast = new auiToast();
+            var dialog = new auiDialog();
+            new Vue({
+                el: '#app',
+                data: {
+                    showTime: '',
+
+                },
+                created: function() {
+                    this.addListenBack()
+
+                    this.showTime = getTime('week')
+                },
+                mounted: function() {
+
+createRili('weekBar','dayBar')
+
+function createRili(weekElId, dayElId) {
+    //内嵌日历
+    var weekItemEl = `<span>一</span>
+  <span>二</span>
+  <span>三</span>
+  <span>四</span>
+  <span>五</span>
+  <span>六</span>
+  <span>日</span>`
+
+    document.getElementById(weekElId).innerHTML = weekItemEl
+
+    var nowdate = new Date(); //当前日期
+    var days = new Date(nowdate.getFullYear(), (nowdate.getMonth() + 1), 0).getDate(); //本月天数
+    var deforedays = new Date(nowdate.getFullYear(), (nowdate.getMonth()), 0).getDate(); //上月天数
+    var month = nowdate.getMonth() + 1,
+        date = nowdate.getDate(),
+        week = nowdate.getDay();
+    var firstday = new Date(); //本月第一天的日期
+    firstday.setDate(1);
+    var firstdayweek = firstday.getDay(); //本月第一天星期几
+    // console.log('今天是' + month + '月' + date + '日，星期' + week);
+    console.log("本月第一天是：星期" + firstdayweek)
+        //判断星期
+        // $('.rl-main .week span').each(function(index, item) {
+        //     if (index == week) {
+        //         $('.rl-main .week span').removeClass('active');
+        //         $(this).addClass('active');
+        //     }
+        // });
+        //生成日历
+    var dayinfo = '',
+        num = 0,
+        numaft = 0;
+    for (var i = 1; i <= 6; i++) {
+        //显示行数
+        dayinfo += '<div class="day">'
+        for (var j = 1; j <= 7; j++) {
+            //显示列数
+            if (i == 1 && j == 1) {
+                //显示上个月的日期
+                // for (var beforeday = firstdayweek - 1; beforeday >= 0; beforeday--) {
+                //     dayinfo += '<span class="before">';
+                //     dayinfo += Number(deforedays - beforeday);
+                //     dayinfo += '</span>'
+                // }
+            } else if (i == 1 && j >= firstdayweek) {
+                if (num == date - 1) {
+                    dayinfo += '<span class="active" id="nowday"> <i></i>' + (++num) + '</span>'
+                } else {
+                    dayinfo += '<span> <i></i>' + (++num) + '</span>'
+                }
+
+            } else if (i > 1) {
+                if (num == days) {
+                    //显示下个月的日期
+                    // dayinfo += '<span class="before">' + (++numaft) + '</span>'
+                } else {
+                    if (num == date - 1) {
+                        dayinfo += '<span class="active" id="nowday"><i></i>' + (++num) + '</span>'
+                    } else {
+                        dayinfo += '<span> <i></i>' + (++num) + '</span>'
+                    }
+                }
+            }
+        }
+        dayinfo += '</div>'
+    }
+    $("#" + dayElId).html(dayinfo)
+        //点击事件
+    $("#" + dayElId + ' span').on('click', function() {
+        $("#" + dayElId + ' span').css({
+            "background-color": "#fff"
+        })
+        $('#nowday').css({
+            'background-color': '#9ec3f3'
+        })
+        $(this).css({
+            'background-color': '#157AFE'
+        })
+
+    })
+}
+
+
+
+
+                },
+                methods: {
+                    allweekCheck: function(i) {
+                        this.isAllweekCheck = i
+                    },
+                    doSelect: function(i) {
+                        this.currentIndex = i;
+                    },
+                    addListenBack: function() {
+                        var that = this
+                            //安卓监听返回键
+                        api.addEventListener({
+                            name: 'keyBack'
+                        }, function(ret) {
+                            if (ret) {
+                                that.closeWin()
+                            }
+                        })
+                    },
+                    closeWin: function() {
+                        api.closeWin()
+                            // api.sendEvent({
+                            //     name: 'refreshNoticeList'
+                            // });
+                    },
+                },
+
+            })
+        }
+    </script>
+</body>
+
+</html>
